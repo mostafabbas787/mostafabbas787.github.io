@@ -51,3 +51,13 @@ All data is stored in the browser's `localStorage`. This means:
 - Data persists across page refreshes within the same browser
 - Each browser/device has its own independent data
 - Clearing browser data will reset all accounts and orders
+
+## ⚠️ Security Notice
+
+This is a **demo/prototype** application designed for GitHub Pages (static hosting). It has the following limitations that make it unsuitable for production use:
+
+- **Passwords are stored in plain text** in `localStorage` — a production app must hash passwords and handle authentication server-side.
+- **No server-side validation** — all logic runs in the browser and can be inspected or modified by users.
+- **Admin credentials are public** — the default admin account is documented in this README for demo purposes.
+
+For a production food ordering application, use a proper backend (e.g., Node.js, Django, Firebase) with secure authentication, encrypted storage, and server-side order processing.
