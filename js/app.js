@@ -20,6 +20,12 @@ function showToast(message, type = "success") {
   }, 3000);
 }
 
+/* ---------- Mobile nav toggle ---------- */
+function toggleMobileNav() {
+  var nav = document.querySelector(".nav-links");
+  if (nav) nav.classList.toggle("open");
+}
+
 /* ---------- Navigation helpers ---------- */
 function updateNav() {
   const session = DB.getSession();
@@ -30,6 +36,7 @@ function updateNav() {
 
   if (session) {
     authNav.innerHTML =
+      '<a href="orders.html">My Orders</a> ' +
       '<span>Hi, ' +
       escapeHtml(session.name.split(" ")[0]) +
       '</span> <a href="#" onclick="logout()">Logout</a>';
@@ -60,14 +67,31 @@ function escapeHtml(str) {
 }
 
 /* ---------- Menu rendering ---------- */
-function renderMenu(category) {
+function renderMenu(category, searchQuery) {
   const grid = document.getElementById("foodGrid");
   if (!grid) return;
 
-  const items =
+  let items =
     category === "All"
       ? MENU
       : MENU.filter((m) => m.category === category);
+
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    items = items.filter(
+      (m) =>
+        m.name.toLowerCase().includes(q) ||
+        m.description.toLowerCase().includes(q)
+    );
+  }
+
+  if (items.length === 0) {
+    grid.innerHTML =
+      '<div class="empty-cart"><div class="icon">🔍</div>' +
+      "<h3>No items found</h3>" +
+      "<p>Try a different search term or category.</p></div>";
+    return;
+  }
 
   grid.innerHTML = items
     .map(
@@ -111,7 +135,17 @@ function filterCategory(btn, category) {
     .querySelectorAll(".category-btn")
     .forEach((b) => b.classList.remove("active"));
   btn.classList.add("active");
-  renderMenu(category);
+  _activeCategory = category;
+  const searchInput = document.getElementById("menuSearch");
+  const query = searchInput ? searchInput.value.trim() : "";
+  renderMenu(category, query);
+}
+
+/* ---------- Search ---------- */
+let _activeCategory = "All";
+
+function searchMenu(query) {
+  renderMenu(_activeCategory, query.trim());
 }
 
 /* ---------- Cart ---------- */
@@ -148,6 +182,18 @@ function renderCart() {
   const container = document.getElementById("cartItems");
   const summaryEl = document.getElementById("cartSummary");
   if (!container) return;
+
+  /* Redirect unauthenticated users */
+  const session = DB.getSession();
+  if (!session) {
+    container.innerHTML =
+      '<div class="empty-cart"><div class="icon">🔒</div>' +
+      "<h3>Please sign in</h3>" +
+      '<p>You need to be signed in to view your cart.</p>' +
+      '<a href="login.html" class="btn btn-primary mt-1">Sign In</a></div>';
+    if (summaryEl) summaryEl.innerHTML = "";
+    return;
+  }
 
   const cart = DB.getCart();
 
@@ -253,6 +299,13 @@ function placeOrder(event) {
 
   if (!address || !phone) {
     showToast("Please fill in all required fields", "error");
+    return;
+  }
+
+  /* Validate phone number format */
+  const phoneClean = phone.replace(/[\s\-().]/g, "");
+  if (!/^\+?\d{7,15}$/.test(phoneClean)) {
+    showToast("Please enter a valid phone number", "error");
     return;
   }
 
@@ -389,4 +442,80 @@ document.addEventListener("DOMContentLoaded", function () {
   if (document.getElementById("cartItems")) {
     renderCart();
   }
+
+  if (document.getElementById("orderHistory")) {
+    renderOrderHistory();
+  }
 });
+
+/* ---------- Order History ---------- */
+function renderOrderHistory() {
+  const container = document.getElementById("orderHistory");
+  if (!container) return;
+
+  const session = DB.getSession();
+  if (!session) {
+    container.innerHTML =
+      '<div class="empty-cart"><div class="icon">🔒</div>' +
+      "<h3>Please sign in</h3>" +
+      '<p>Sign in to view your order history.</p>' +
+      '<a href="login.html" class="btn btn-primary mt-1">Sign In</a></div>';
+    return;
+  }
+
+  const orders = DB.getOrders()
+    .filter(function (o) { return o.username === session.username; })
+    .reverse();
+
+  if (orders.length === 0) {
+    container.innerHTML =
+      '<div class="empty-cart"><div class="icon">📦</div>' +
+      "<h3>No orders yet</h3>" +
+      '<p>Place your first order from our delicious menu!</p>' +
+      '<a href="index.html" class="btn btn-primary mt-1">Browse Menu</a></div>';
+    return;
+  }
+
+  container.innerHTML = orders
+    .map(function (o) {
+      var statusClass = "badge-pending";
+      if (o.status === "Preparing") statusClass = "badge-preparing";
+      else if (o.status === "Delivered") statusClass = "badge-delivered";
+      else if (o.status === "Cancelled") statusClass = "badge-cancelled";
+
+      return (
+        '<div class="order-history-card">' +
+        '<div class="order-history-header">' +
+        "<span><strong>" + escapeHtml(o.id) + "</strong></span>" +
+        '<span class="badge ' + statusClass + '">' + escapeHtml(o.status) + "</span>" +
+        "</div>" +
+        '<div class="order-history-items">' +
+        o.items.map(function (i) {
+          return escapeHtml(i.name) + " x" + i.qty;
+        }).join(", ") +
+        "</div>" +
+        '<div class="order-history-footer">' +
+        "<span>$" + o.total.toFixed(2) + "</span>" +
+        "<span>" + new Date(o.createdAt).toLocaleDateString() + "</span>" +
+        "</div></div>"
+      );
+    })
+    .join("");
+}
+
+/* ---------- Contact form ---------- */
+function handleContact(event) {
+  event.preventDefault();
+  var name = document.getElementById("contactName").value.trim();
+  var email = document.getElementById("contactEmail").value.trim();
+  var message = document.getElementById("contactMessage").value.trim();
+
+  if (!name || !email || !message) {
+    showToast("Please fill in all fields", "error");
+    return;
+  }
+
+  /* In a real app, this would send the message to the backend */
+  showToast("Thank you! Your message has been sent.");
+  document.getElementById("contactForm").reset();
+}

@@ -1,0 +1,20 @@
+{
+  "name": "foodexpress-backend",
+  "version": "1.0.0",
+  "description": "Backend API server for FoodExpress food ordering app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/api.test.js"
+  },
+  "keywords": ["food", "ordering", "express", "api"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "uuid": "^13.0.0"
+  }
+}
