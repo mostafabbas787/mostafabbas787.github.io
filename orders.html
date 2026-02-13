@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FoodExpress — Order Delicious Food Online</title>
+  <title>My Orders — FoodExpress</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -25,20 +25,11 @@
     </div>
   </nav>
 
-  <!-- Hero -->
-  <section class="hero">
-    <h1>Delicious Food, Delivered Fast</h1>
-    <p>Browse our menu and order your favorite meals. Fresh, hot, and right to your door!</p>
-    <div class="search-bar">
-      <input type="text" id="menuSearch" placeholder="Search for food..." oninput="searchMenu(this.value)" />
-    </div>
-  </section>
-
-  <!-- Category Filters -->
-  <div id="categoryFilters" class="category-filters"></div>
-
-  <!-- Food Grid -->
-  <div id="foodGrid" class="food-grid"></div>
+  <!-- Order History -->
+  <main class="cart-container">
+    <h2>My Orders</h2>
+    <div id="orderHistory"></div>
+  </main>
 
   <!-- Footer -->
   <footer class="footer">

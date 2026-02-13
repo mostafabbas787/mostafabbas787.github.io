@@ -11,8 +11,10 @@
   <nav class="navbar">
     <div class="navbar-inner">
       <a href="index.html" class="logo"><span>🍔</span> FoodExpress</a>
+      <button class="hamburger" onclick="toggleMobileNav()" aria-label="Toggle menu">☰</button>
       <ul class="nav-links">
         <li><a href="index.html">Menu</a></li>
+        <li><a href="contact.html">Contact</a></li>
         <li>
           <a href="cart.html" class="cart-link">
             🛒 Cart <span id="cartCount" class="cart-badge" style="display:none">0</span>
@@ -42,7 +44,7 @@
         </div>
         <div class="form-group">
           <label for="phone">Phone Number *</label>
-          <input type="tel" id="phone" placeholder="+1 234 567 8900" required />
+          <input type="tel" id="phone" placeholder="+1 234 567 8900" pattern="[\+]?[\d\s\-().]{7,}" title="Enter a valid phone number" required />
         </div>
         <div class="form-group">
           <label for="notes">Special Instructions</label>
